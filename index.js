@@ -15,6 +15,15 @@ const cardsMap = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
 ].map(e => e.join())
 
+const field = Array.from({length : 13}).map((q,x) => Array.from({length : 4}).map((e,y) => {
+  const names = ["A","2","3","4","5","6","7","8","9","10","J", "Q", "K"]
+  const couleurs = ["h","c","d",'s']
+  return {
+    id : `${names[x]}${couleurs[y]}`
+  }
+}))
+
+console.log(field);
 
 function htmlToElement(html) {
   var template = document.createElement('template');
@@ -73,17 +82,17 @@ const CARD_PIOCHE = [27, 170]
         map[i] = info[i * step + 1] === 255 ? 0 : 1
       }
       map = map.join()
-      const i = cardsMap.findIndex(e => e === map)
+      const x = cardsMap.findIndex(e => e === map)
       // console.log(i + 1);
 
-      const couleur = (() => {
+      const y = (() => {
         if (getPixel(61, 215)[0] === 17) { //black
           return getPixel(55, 208)[0] === 17 ? 3 : 1;
         } else {
           return getPixel(49, 202)[0] === 209 ? 0 : 2
         }
       })()
-      console.log(couleur);
+      console.log(field[x][y].id);
     }
 
     canvas.addEventListener("mousemove", (e) => {
