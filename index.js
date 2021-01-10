@@ -15,11 +15,13 @@ const cardsMap = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
 ].map(e => e.join())
 
-const field = Array.from({length : 13}).map((q,x) => Array.from({length : 4}).map((e,y) => {
-  const names = ["A","2","3","4","5","6","7","8","9","10","J", "Q", "K"]
-  const couleurs = ["h","c","d",'s']
+const field = Array.from({ length: 13 }).map((q, x) => Array.from({ length: 4 }).map((e, y) => {
+  const names = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+  const couleurs = ["h", "c", "d", 's']
   return {
-    id : `${names[x]}${couleurs[y]}`
+    coord: [x, y],
+    id: `${names[x]}${couleurs[y]}`,
+    status: "UNKNOW"
   }
 }))
 
@@ -56,7 +58,7 @@ const CARD_PIOCHE = [27, 170]
     console.log(canvas);
     const ctx = canvas.getContext("2d")
     console.log(ctx);
-    document.body.appendChild(htmlToElement(`<div>X : <span id="x_"></span> <br/>Y : <span id="y_"></span> <br/>C : <span id="c_"></span> </div>`))
+    document.body.appendChild(htmlToElement(`<div>X : <span id="x_"></span> <br/>Y : <span id="y_"></span> <br/>C : <span id="c_"></span>  <br/> <button id="startGame">start tracker</button></div>`))
 
     const pixequal = (pix, pix2) => {
       return (pix[0] === pix2[0] && pix[1] === pix2[1] && pix[2] === pix2[2])
@@ -92,7 +94,7 @@ const CARD_PIOCHE = [27, 170]
           return getPixel(49, 202)[0] === 209 ? 0 : 2
         }
       })()
-      console.log(field[x][y].id);
+      return field[x][y]
     }
 
     canvas.addEventListener("mousemove", (e) => {
@@ -114,23 +116,56 @@ const CARD_PIOCHE = [27, 170]
       }
     }
 
-    let player = await getPlayerTUrn()
-    while (true) {
-      if (player === VILAIN) {
-
-      }
-      scanCard(CARD_PIOCHE)
+    const waitPixel = async (pos, color1) => {
       while (true) {
-        const playerTmp = await getPlayerTUrn()
-        if (playerTmp !== player) {
-          player = playerTmp
-          break
+        if (getPixel(pos[0], pos[1])[0] === color1) {
+          return;
         }
         await sleep(10)
       }
-      await sleep(10)
     }
 
+
+    const start = async () => {
+      let player = await getPlayerTUrn()
+      const piocheBase = scanCard(CARD_PIOCHE)
+      if (player === VILAIN) {
+        while (true) {
+          if (getPixel(263, 69)[0] !== 40) {//taken
+            piocheBase.status = "VILAIN"
+            break
+          }
+          if (getPixel(378, 291) === 255) {//discard
+            piocheBase.status = "REFUSED_VILAIN"
+            break
+          }
+          await sleep(10)
+        }
+        console.log("VILAIN :", piocheBase);
+        await waitPixel([378, 291], 255)// hero to play
+        console.log("HERO TURN");
+      } else {
+
+      }
+
+      // while (true) {
+      //   if (player === VILAIN) {
+
+      //   }
+      //   scanCard(CARD_PIOCHE)
+      //   while (true) {
+      //     const playerTmp = await getPlayerTUrn()
+      //     if (playerTmp !== player) {
+      //       player = playerTmp
+      //       break
+      //     }
+      //     await sleep(10)
+      //   }
+      //   await sleep(10)
+      // }
+    }
+
+    document.querySelector("#startGame").addEventListener("click", start)
 
 
   })()
