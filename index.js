@@ -139,14 +139,13 @@ const CARD_PIOCHE = [27, 170]
       hudCtx.clearRect(0, 0, hud.clientWidth, hud.clientHeight);
       for (let line of field) {
         for (let card of line) {
-          if (card.status !== "UNKNOW" || true) {
+          if (card.status === "VILAIN") {
             const coords = getCardCoord(card.coord[0], card.coord[1]);
-            hudCtx.fillStyle = "red";
-            hudCtx.rect(coords[0], coords[1], 1, 1)
+            hudCtx.fillStyle = `#ff000055`;
+            hudCtx.fillRect(coords[0], coords[1], 32, 37.5)
           }
         }
       }
-      hudCtx.fill();
     }
 
     const start = async () => {
@@ -167,7 +166,6 @@ const CARD_PIOCHE = [27, 170]
       // hudCtx.fillStyle = "red";
       // // hudCtx.rect(136,309,300,300);
       // hudCtx.fill()
-      print();
 
 
       let player = await getPlayerTUrn()
@@ -185,8 +183,9 @@ const CARD_PIOCHE = [27, 170]
           await sleep(10)
         }
         console.log("VILAIN :", piocheBase);
+        print();
         await waitPixel([378, 291], 255)// hero to play
-        start();
+        console.log("HERO TURN NOW");
       } else {
 
       }
