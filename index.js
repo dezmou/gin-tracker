@@ -216,6 +216,7 @@ const CARD_PIOCHE = [27, 170];
             }
             console.log("VILAIN :", piocheBase);
             print();
+            await sleep(10)
             await Promise.race([
               waitPixel([378, 291], 255),
               waitGameIdChange(currentGameId),
