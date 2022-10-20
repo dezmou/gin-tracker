@@ -1,3 +1,5 @@
+// fitnesspark
+// rpogjfpodgjfop
 
 const cardsMap = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
@@ -57,8 +59,10 @@ const CARD_PIOCHE = [27, 170]
     })()
     console.log(canvas);
     const ctx = canvas.getContext("2d")
-    console.log(ctx);
     document.body.appendChild(htmlToElement(`<div>X : <span id="x_"></span> <br/>Y : <span id="y_"></span> <br/>C : <span id="c_"></span>  <br/> <button id="startGame">start tracker</button></div>`))
+
+    const hud = document.createElement("canvas");
+    const hudCtx = hud.getContext("2d");
 
     const pixequal = (pix, pix2) => {
       return (pix[0] === pix2[0] && pix[1] === pix2[1] && pix[2] === pix2[2])
@@ -125,8 +129,47 @@ const CARD_PIOCHE = [27, 170]
       }
     }
 
+    const getCardCoord = (x, y) => {
+      const newX = (138) + (x * 32);
+      const newY = (315) + (y * 37.5);
+      return [newX, newY];
+    }
+
+    const print = () => {
+      hudCtx.clearRect(0, 0, hud.clientWidth, hud.clientHeight);
+      for (let line of field) {
+        for (let card of line) {
+          if (card.status !== "UNKNOW" || true) {
+            const coords = getCardCoord(card.coord[0], card.coord[1]);
+            hudCtx.fillStyle = "red";
+            hudCtx.rect(coords[0], coords[1], 1, 1)
+          }
+        }
+      }
+      hudCtx.fill();
+    }
 
     const start = async () => {
+      const container = document.querySelector("#precont > div.gview.sbfixed > div.bcont.noth.usno")
+      const canvas = document.querySelector("#precont > div.gview.sbfixed > div.bcont.noth.usno > canvas.noth");
+      hud.width = canvas.width * PXRATIO;
+      hud.height = canvas.height * PXRATIO;
+      hud.style.width = canvas.clientWidth;
+      hud.style.height = canvas.clientHeight;
+
+      // hud.style.width = canvas.clientWidth;
+      // hud.style.height = canvas.clientHeight;
+      hud.style.position = "absolute";
+      hud.style['z-index'] = "9999";
+      hud.style['pointerEvents'] = "none";
+      hud.style['image-rendering'] = "crisp-edges";
+      container.appendChild(hud);
+      // hudCtx.fillStyle = "red";
+      // // hudCtx.rect(136,309,300,300);
+      // hudCtx.fill()
+      print();
+
+
       let player = await getPlayerTUrn()
       const piocheBase = scanCard(CARD_PIOCHE)
       if (player === VILAIN) {
@@ -143,26 +186,10 @@ const CARD_PIOCHE = [27, 170]
         }
         console.log("VILAIN :", piocheBase);
         await waitPixel([378, 291], 255)// hero to play
-        console.log("HERO TURN");
+        start();
       } else {
 
       }
-
-      // while (true) {
-      //   if (player === VILAIN) {
-
-      //   }
-      //   scanCard(CARD_PIOCHE)
-      //   while (true) {
-      //     const playerTmp = await getPlayerTUrn()
-      //     if (playerTmp !== player) {
-      //       player = playerTmp
-      //       break
-      //     }
-      //     await sleep(10)
-      //   }
-      //   await sleep(10)
-      // }
     }
 
     document.querySelector("#startGame").addEventListener("click", start)
