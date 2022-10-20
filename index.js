@@ -164,17 +164,17 @@ const CARD_PIOCHE = [27, 170];
       for (let card of line) {
         if (card.status === "VILAIN") {
           const coords = getCardCoord(card.coord[0], card.coord[1]);
-          hudCtx.fillStyle = `#ff0000BB`;
+          hudCtx.fillStyle = `#ff0000cc`;
           hudCtx.fillRect(coords[0], coords[1], 32, 37.5)
         }
         if (card.status === "REFUSED_VILAIN") {
           const coords = getCardCoord(card.coord[0], card.coord[1]);
-          hudCtx.fillStyle = `#8a8a8aBB`;
+          hudCtx.fillStyle = `#8a8a8acc`;
           hudCtx.fillRect(coords[0], coords[1], 32, 37.5)
         }
         if (card.status === "PROPOSE") {
           const coords = getCardCoord(card.coord[0], card.coord[1]);
-          hudCtx.fillStyle = `#7765c4BB`;
+          hudCtx.fillStyle = `#ff00b6cc`;
           hudCtx.fillRect(coords[0], coords[1], 32, 37.5)
         }
       }
