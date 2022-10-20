@@ -84,6 +84,7 @@ const CARD_PIOCHE = [27, 170];
   // // hudCtx.rect(136,309,300,300);
   // hudCtx.fill()
 
+  let gameId = 0;
 
 
   const pixequal = (pix, pix2) => {
@@ -179,74 +180,97 @@ const CARD_PIOCHE = [27, 170];
       }
     }
   }
-  let gameId = 0;
+
+  const waitGameIdChange = async (cur) => {
+    while (true) {
+      if (cur !== gameId) {
+        break;
+      }
+      await sleep(100)
+    }
+  }
 
   const start = async () => {
-    await (async () => {
-      const currentGameId = gameId;
-      resetField();
-      while (true) {
-        let player = await getPlayerTUrn()
-        if (currentGameId !== gameId) return;
-        const piocheBase = scanCard(CARD_PIOCHE)
-        if (player === VILAIN) {
-          while (true) {
-            if (getPixel(263, 69)[0] !== 40) {//vilain action
-              const tmpPioche = scanCard(CARD_PIOCHE)
-              if (tmpPioche === piocheBase) {
-                piocheBase.status = "REFUSED_VILAIN"
-              } else {
-                console.log("VILAIN TAKE");
-                piocheBase.status = "VILAIN"
-              }
-              break
-            }
-            if (currentGameId !== gameId) return;
-            await sleep(10)
-          }
-          console.log("VILAIN :", piocheBase);
-          print();
-          await waitPixel([378, 291], 255)// hero to play
+    try {
+      await (async () => {
+        const currentGameId = gameId;
+        resetField();
+        while (true) {
+          let player = await getPlayerTUrn()
           if (currentGameId !== gameId) return;
-        } else {
-          const pioche = scanCard(CARD_PIOCHE)
-          pioche.status = "PROPOSE"
-          print();
-
-          const clickPos = await new Promise(r => {
-            const click = (e) => {
-              if (
-                (e.layerX > 21 && e.layerX < 98 && e.layerY > 165 && e.layerY < 257)
-                || (e.layerX > 643 && e.layerX < 734 && e.layerY > 149 && e.layerY < 275)
-
-              ) {
-                canvas.removeEventListener('click', click);
-                r([
-                  e.layerX,
-                  e.layerY,
-                ]);
+          const piocheBase = scanCard(CARD_PIOCHE)
+          if (player === VILAIN) {
+            while (true) {
+              if (getPixel(263, 69)[0] !== 40) {//vilain action
+                const tmpPioche = scanCard(CARD_PIOCHE)
+                if (tmpPioche === piocheBase) {
+                  piocheBase.status = "REFUSED_VILAIN"
+                } else {
+                  console.log("VILAIN TAKE");
+                  piocheBase.status = "VILAIN"
+                }
+                break
               }
+              if (currentGameId !== gameId) return;
+              await sleep(10)
             }
-            canvas.addEventListener("click", click)
-          })
-          if (currentGameId !== gameId) return;
-          pioche.status = "REFUSED_VILAIN"
-          print()
-          while (true) {
-            let tmpPlayer = await getPlayerTUrn()
-            if (tmpPlayer === VILAIN) {
-              break;
-            }
+            console.log("VILAIN :", piocheBase);
+            print();
+            await Promise.race([
+              waitPixel([378, 291], 255),
+              waitGameIdChange(currentGameId),
+            ])
             if (currentGameId !== gameId) return;
-            await sleep(10)
+          } else {
+            const pioche = scanCard(CARD_PIOCHE)
+            pioche.status = "PROPOSE"
+            print();
+            await Promise.race([
+              new Promise(r => {
+                const click = (e) => {
+                  if (
+                    (e.layerX > 21 && e.layerX < 98 && e.layerY > 165 && e.layerY < 257)
+                    || (e.layerX > 643 && e.layerX < 734 && e.layerY > 149 && e.layerY < 275)
+                  ) {
+                    canvas.removeEventListener('click', click);
+                    r([
+                      e.layerX,
+                      e.layerY,
+                    ]);
+                  }
+                }
+                canvas.addEventListener("click", click)
+              }),
+              waitGameIdChange(currentGameId)
+            ])
+            if (currentGameId !== gameId) return;
+            pioche.status = "REFUSED_VILAIN"
+            print()
+            while (true) {
+              const tmpPlayer = await Promise.race([
+                getPlayerTUrn(),
+                waitGameIdChange(currentGameId)
+              ])
+              if (currentGameId !== gameId) return;
+              if (tmpPlayer === VILAIN) {
+                break;
+              }
+              await sleep(10)
+              if (currentGameId !== gameId) return;
+            }
           }
         }
-      }
-    })()
+      })()
+    } catch (e) {
+      console.log(e);
+      gameId += 1;
+    }
     console.log("GAME ENDED");
     resetField();
     print();
   }
+
+  await sleep(500)
 
   document.querySelector("#startGame").addEventListener("click", start)
   document.querySelector("#reset").addEventListener("click", () => {
